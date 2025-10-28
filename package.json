@@ -1,0 +1,26 @@
+{
+  "name": "authentication-authorization",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/pg": "^8.15.6",
+    "drizzle-kit": "^0.31.6",
+    "ts-node": "^10.9.2"
+  },
+  "scripts": {
+    "dev": "bun --watch --env-file=.env src/app.ts",
+    "start": "bun --env-file=.env src/app.ts"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.7",
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10",
+    "pg": "^8.16.3",
+    "postgres": "^3.4.7"
+  }
+}
