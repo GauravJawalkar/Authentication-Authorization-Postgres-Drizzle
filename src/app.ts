@@ -8,9 +8,9 @@ app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PO
 app.use(express.json());
 
 // Specific controller imports
-import authController from './routes/auth.route'
+import authRouter from './routes/auth.route'
 
-app.use('/api/v1/auth', authController);
+app.use('/api/v1/auth', authRouter);
 
 
 
