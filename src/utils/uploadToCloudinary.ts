@@ -13,7 +13,7 @@ export const uploadImageToCloudinary = async (localFilePath: string, folder: str
         // Upload to specific folder in Cloudinary
         const response = await cloudinary.uploader.upload(localFilePath, { resource_type: "auto", folder });
 
-        console.log("File uploaded on cloudinary . File src :", response.url);
+        console.log("File uploaded on cloudinary : ", response.url);
 
         // Remove temp file after upload
         fs.unlinkSync(localFilePath);

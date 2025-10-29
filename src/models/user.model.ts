@@ -3,7 +3,7 @@ export const genderEnum = pgEnum('Gender', ['male', 'female'])
 
 const usersTable = pgTable("users", {
     id: uuid('id').primaryKey().defaultRandom(),
-    firstNam: varchar('FirstName', { length: 255 }).notNull(),
+    firstName: varchar('FirstName', { length: 255 }).notNull(),
     lastName: varchar('LastName', { length: 255 }),
     email: varchar('Email', { length: 255 }).notNull(),
     gender: genderEnum('Gender').notNull(),
