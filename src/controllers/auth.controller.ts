@@ -57,7 +57,30 @@ const signupUser = async (req: Request, res: Response) => {
 
 const loginUser = async (req: Request, res: Response) => {
     try {
-        return res.status(200).json({ data: "Login Controller" });
+        const { email, password } = req.body;
+
+        // Check if details are provided
+        if ([email, password].some(field => !field || field.trim() === "")) {
+            throw new ApiError(400, "All fields are required");
+        }
+
+        // Check if user exists
+        const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email));
+
+        if (!user) {
+            throw new ApiError(404, "User not found with the given email");
+        }
+
+        // If user exist check the given password matches with the one in the database
+        if (user?.password !== password) {
+            throw new ApiError(400, "Incorrect credentials");
+        }
+
+        const loggedUser = user;
+
+        // Returning the logged User data
+        return res.status(200).json({ message: "Logged In Successfully", user: loggedUser });
+
     } catch (error) {
         throw new ApiError(500, "Internal Server Error");
     }
