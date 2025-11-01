@@ -3,6 +3,7 @@ import { ApiError } from "../utils/Api.Error";
 import { db } from "../db";
 import { usersTable } from "../models";
 import { eq } from "drizzle-orm";
+import jwt from 'jsonwebtoken'
 import { uploadImageToCloudinary } from "../utils/uploadToCloudinary";
 
 const signupUser = async (req: Request, res: Response) => {
@@ -78,8 +79,19 @@ const loginUser = async (req: Request, res: Response) => {
 
         const loggedUser = user;
 
+        // Access token creation and payload
+        const payload = {
+            name: loggedUser?.firstName,
+            email: loggedUser?.email,
+            gender: loggedUser?.gender
+        }
+
+        const accessToken = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '1m' });
+
+        const userDetails = { ...loggedUser, accessToken: accessToken };
+
         // Returning the logged User data
-        return res.status(200).json({ message: "Logged In Successfully", user: loggedUser });
+        return res.status(200).json({ message: "Logged In Successfully", user: userDetails });
 
     } catch (error) {
         throw new ApiError(500, "Internal Server Error");
