@@ -7,7 +7,7 @@ const usersTable = pgTable("users", {
     lastName: varchar('LastName', { length: 255 }),
     email: varchar('Email', { length: 255 }).notNull(),
     gender: genderEnum('Gender').notNull(),
-    password: varchar('Password', { length: 16 }).notNull(),
+    password: varchar('Password').notNull(),
     profileImage: varchar('ProfileImage')
 })
 

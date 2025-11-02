@@ -5,6 +5,7 @@ import { usersTable } from "../models";
 import { eq } from "drizzle-orm";
 import jwt from 'jsonwebtoken'
 import { uploadImageToCloudinary } from "../utils/uploadToCloudinary";
+import bcrypt from 'bcrypt'
 
 const signupUser = async (req: Request, res: Response) => {
     try {
@@ -33,13 +34,16 @@ const signupUser = async (req: Request, res: Response) => {
         // Upload the file from public/temp to Cloudinary
         const profileImage = await uploadImageToCloudinary(profileImageLocalPath, "Authentication");
 
+        // encrypt password before storing
+        const encryptedPassword = bcrypt.hashSync(password, Number(process.env.SALT_ROUNDS!)).toString();
+
         // Insert user into the database
         const [createdUser] = await db.insert(usersTable).values({
             firstName,
             lastName,
             gender,
             email,
-            password,
+            password: encryptedPassword,
             profileImage: profileImage?.secure_url
         }).returning();
 
@@ -69,12 +73,15 @@ const loginUser = async (req: Request, res: Response) => {
         const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email));
 
         if (!user) {
-            throw new ApiError(404, "User not found with the given email");
+            return res.status(404).json(new ApiError(404, "User not found with the given email"))
         }
 
+        // Decrypt the password
+        const isPasswordValid = bcrypt.compareSync(password, user?.password);
+
         // If user exist check the given password matches with the one in the database
-        if (user?.password !== password) {
-            throw new ApiError(400, "Incorrect credentials");
+        if (!isPasswordValid) {
+            return res.status(400).json({ error: "Invalid credentials" });
         }
 
         const loggedUser = user;
@@ -94,6 +101,7 @@ const loginUser = async (req: Request, res: Response) => {
         return res.status(200).json({ message: "Logged In Successfully", user: userDetails });
 
     } catch (error) {
+        console.error("The error is : ", error);
         throw new ApiError(500, "Internal Server Error");
     }
 }
