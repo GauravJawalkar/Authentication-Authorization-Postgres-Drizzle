@@ -32,12 +32,12 @@ export const userDetails = async (req: Request, res: Response, next: NextFunctio
         }
 
         // Validate JWT_SECRET environment variable
-        if (!process.env.JWT_SECRET) {
+        if (!process.env.ACCESS_TOKEN_SECRET) {
             return res.status(500).json(new ApiError(500, "JWT_SECRET is not configured"));
         }
 
         try {
-            const decodedUser = jwt.verify(token, process.env.JWT_SECRET);
+            const decodedUser = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
             req.user = decodedUser;
             next();
         } catch (jwtError) {

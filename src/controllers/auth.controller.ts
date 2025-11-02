@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import jwt from 'jsonwebtoken'
 import { uploadImageToCloudinary } from "../utils/uploadToCloudinary";
 import bcrypt from 'bcrypt'
+import { generateAccessToken } from "../utils/tokens";
 
 const signupUser = async (req: Request, res: Response) => {
     try {
@@ -93,9 +94,12 @@ const loginUser = async (req: Request, res: Response) => {
             gender: loggedUser?.gender
         }
 
-        const accessToken = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '1m' });
+        const accessToken = generateAccessToken(payload);
 
-        const userDetails = { ...loggedUser, accessToken: accessToken };
+        console.log("The access Token is : ", accessToken);
+
+
+        const userDetails = { ...loggedUser, accessToken };
 
         // Returning the logged User data
         return res.status(200).json({ message: "Logged In Successfully", user: userDetails });
