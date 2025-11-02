@@ -1,6 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import { ApiError } from "../utils/Api.Error";
 import jwt, { JsonWebTokenError, TokenExpiredError, type JwtPayload } from "jsonwebtoken";
+import { generateAccessToken } from "../utils/tokens";
+import type { TokenUser } from "../interface/interface";
 
 declare global {
     namespace Express {
@@ -10,9 +12,9 @@ declare global {
     }
 }
 
-export const userDetails = async (req: Request, res: Response, next: NextFunction) => {
+export const verifyUserJwt = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const tokenHeader = req.headers['authorization'];
+        const tokenHeader = req.headers.authorization;
 
         // Check if authorization header exists
         if (!tokenHeader) {
@@ -42,7 +44,31 @@ export const userDetails = async (req: Request, res: Response, next: NextFunctio
             next();
         } catch (jwtError) {
             if (jwtError instanceof TokenExpiredError) {
-                return res.status(401).json({ error: "Token has expired" });
+                const refreshToken = req.cookies?.refreshToken;
+
+                if (!refreshToken) return res.status(401).json({ error: "Login Again" });
+
+                try {
+                    const user = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!) as TokenUser;
+
+                    const payload: TokenUser = {
+                        id: user?.id,
+                        name: user.name,
+                        email: user.email,
+                    }
+
+                    const newAccessToken = generateAccessToken(payload);
+
+                    res.setHeader("Authorization", `Bearer ${newAccessToken}`);
+
+                    req.user = user;
+                    return next();
+
+                } catch (jwtError) {
+                    if (jwtError instanceof TokenExpiredError) return res.status(401).json({ error: "Refresh Token Expired" });
+                }
+
+                return res.status(401).json({ error: "Token expired!" });
             }
             if (jwtError instanceof JsonWebTokenError) {
                 return res.status(401).json({ error: "Invalid Token" });

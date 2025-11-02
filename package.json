@@ -18,11 +18,13 @@
   },
   "dependencies": {
     "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.8.0",
+    "cookie-parser": "^1.4.7",
     "drizzle-orm": "^0.44.7",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",

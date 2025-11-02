@@ -3,10 +3,9 @@ import { ApiError } from "../utils/Api.Error";
 import { db } from "../db";
 import { usersTable } from "../models";
 import { eq } from "drizzle-orm";
-import jwt from 'jsonwebtoken'
 import { uploadImageToCloudinary } from "../utils/uploadToCloudinary";
 import bcrypt from 'bcrypt'
-import { generateAccessToken } from "../utils/tokens";
+import { generateAccessToken, generateRefreshToken } from "../utils/tokens";
 
 const signupUser = async (req: Request, res: Response) => {
     try {
@@ -89,6 +88,7 @@ const loginUser = async (req: Request, res: Response) => {
 
         // Access token creation and payload
         const payload = {
+            id: loggedUser?.id,
             name: loggedUser?.firstName,
             email: loggedUser?.email,
             gender: loggedUser?.gender
@@ -96,8 +96,13 @@ const loginUser = async (req: Request, res: Response) => {
 
         const accessToken = generateAccessToken(payload);
 
-        console.log("The access Token is : ", accessToken);
+        const refreshToken = generateRefreshToken(payload);
 
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict"
+        })
 
         const userDetails = { ...loggedUser, accessToken };
 
