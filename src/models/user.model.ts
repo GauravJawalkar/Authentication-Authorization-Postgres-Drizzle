@@ -1,4 +1,4 @@
-import { pgTable, integer, uuid, varchar, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, pgEnum, timestamp } from "drizzle-orm/pg-core";
 export const genderEnum = pgEnum('Gender', ['male', 'female'])
 
 const usersTable = pgTable("users", {
@@ -11,4 +11,11 @@ const usersTable = pgTable("users", {
     profileImage: varchar('ProfileImage')
 })
 
-export { usersTable }
+const resetPasswordTable = pgTable("reset_password", {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('User_Id').notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+    otp: varchar('Otp').notNull(),
+    expiresAt: timestamp('Expires_At').notNull()
+})
+
+export { usersTable, resetPasswordTable }

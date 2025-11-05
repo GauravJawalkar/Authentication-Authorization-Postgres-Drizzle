@@ -5,6 +5,7 @@
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/nodemailer": "^7.0.3",
     "@types/pg": "^8.15.6",
     "drizzle-kit": "^0.31.6",
     "ts-node": "^10.9.2"
@@ -29,6 +30,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.10",
     "nodemon": "^3.1.10",
     "pg": "^8.16.3",
     "postgres": "^3.4.7"

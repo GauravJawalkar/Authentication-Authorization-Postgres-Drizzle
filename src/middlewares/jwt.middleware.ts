@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { ApiError } from "../utils/Api.Error";
 import jwt, { JsonWebTokenError, TokenExpiredError, type JwtPayload } from "jsonwebtoken";
-import { generateAccessToken } from "../utils/tokens";
+import { generateAccessToken } from "../helpers/tokens";
 import type { TokenUser } from "../interface/interface";
 
 declare global {

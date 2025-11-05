@@ -1,0 +1,1 @@
+ALTER TABLE "reset_password" ALTER COLUMN "Otp" SET DATA TYPE varchar;

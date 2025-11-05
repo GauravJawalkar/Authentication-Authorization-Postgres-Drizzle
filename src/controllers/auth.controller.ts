@@ -1,11 +1,12 @@
 import type { Request, Response } from "express";
 import { ApiError } from "../utils/Api.Error";
 import { db } from "../db";
-import { usersTable } from "../models";
+import { resetPasswordTable, usersTable } from "../models";
 import { eq } from "drizzle-orm";
-import { uploadImageToCloudinary } from "../utils/uploadToCloudinary";
+import { uploadImageToCloudinary } from "../helpers/uploadToCloudinary";
 import bcrypt from 'bcrypt'
-import { generateAccessToken, generateRefreshToken } from "../utils/tokens";
+import { generateAccessToken, generateRefreshToken } from "../helpers/tokens";
+import { sendEmail } from "../helpers/email";
 
 const signupUser = async (req: Request, res: Response) => {
     try {
@@ -117,6 +118,19 @@ const loginUser = async (req: Request, res: Response) => {
 
 const forgotPassword = async (req: Request, res: Response) => {
     try {
+        const { email } = req.body;
+
+        if (email.trim() === "") {
+            return res.json(new ApiError(400, "Email is required")).status(400);
+        }
+
+        const response = await sendEmail(email, "forgotPassword", res);
+
+        if (!response) {
+            return res.json(new ApiError(500, "Failed to send OTP")).status(500);
+        }
+
+        return res.status(200).json({ message: "OTP sent to the email successfully" });
 
     } catch (error) {
         console.error("Error Resetting password : ", error);
@@ -124,4 +138,52 @@ const forgotPassword = async (req: Request, res: Response) => {
     }
 }
 
-export { signupUser, loginUser }
+const resetPassword = async (req: Request, res: Response) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+
+        if (email.trim() === "" || otp.trim() === "" || newPassword.trim() === "") {
+            return res.json(new ApiError(400, "Please provide email and otp")).status(400);
+        }
+
+        const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email));
+
+        if (!user) {
+            return res.status(404).json(new ApiError(404, "User not found with the given email"));
+        }
+
+        const [passwordResetRecord] = await db.select().from(resetPasswordTable).where(eq(resetPasswordTable.userId, user.id));
+
+        if (!passwordResetRecord) {
+            return res.status(400).json(new ApiError(400, "Invalid OTP or User"));
+        }
+
+        const isOtpValid = bcrypt.compareSync(otp, passwordResetRecord?.otp);
+
+        if (!isOtpValid) {
+            return res.status(400).json({ message: "Invalid OTP" });
+        }
+
+        if (passwordResetRecord.expiresAt < new Date()) {
+            return res.status(400).json(new ApiError(400, "OTP has expired"));
+        }
+
+        const encryptedPassword = bcrypt.hashSync(newPassword, Number(process.env.SALT_ROUNDS!));
+
+        const response = await db.update(usersTable).set({ password: encryptedPassword }).where(eq(usersTable.id, user?.id)).returning();
+
+        if (response.length > 0) {
+            await db.delete(resetPasswordTable).where(eq(resetPasswordTable.userId, user.id));
+        } else {
+            return res.status(500).json(new ApiError(500, "Failed to reset the password"));
+        }
+
+        return res.status(200).json({ message: "Password reset successfully" });
+
+    } catch (error) {
+        console.error("Error resetting the password : ", error)
+        return res.status(500).json(new ApiError(500, "Error Resetting the password"));
+    }
+}
+
+export { signupUser, loginUser, forgotPassword, resetPassword }

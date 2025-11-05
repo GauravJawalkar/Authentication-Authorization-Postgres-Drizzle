@@ -8,6 +8,20 @@
       "when": 1761758889070,
       "tag": "0000_melodic_brood",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1762372398653,
+      "tag": "0001_powerful_moondragon",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1762373468352,
+      "tag": "0002_lethal_tigra",
+      "breakpoints": true
     }
   ]
 }
