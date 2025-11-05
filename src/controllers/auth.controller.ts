@@ -13,14 +13,14 @@ const signupUser = async (req: Request, res: Response) => {
 
         // Validate fields
         if ([firstName, lastName, email, gender, password].some(field => !field || field.trim() === "")) {
-            throw new ApiError(400, "All fields are required");
+            return res.json(new ApiError(400, "All fields are required")).status(400);
         }
 
         // Check if user already exists
         const [existingUser] = await db.select().from(usersTable).where(eq(usersTable.email, email));
 
         if (existingUser) {
-            throw new ApiError(409, "User with this email already exists!");
+            return res.json(new ApiError(409, "User with this email already exists!")).status(409);
         }
 
         // Get file to upload and store it temporarily in the public/temp folder
@@ -28,7 +28,7 @@ const signupUser = async (req: Request, res: Response) => {
         const profileImageLocalPath = files?.profileImage?.[0]?.path;
 
         if (!profileImageLocalPath) {
-            throw new ApiError(400, "Profile-image file is missing")
+            return res.json(new ApiError(400, "Profile-image file is missing")).status(400)
         }
 
         // Upload the file from public/temp to Cloudinary
@@ -49,14 +49,14 @@ const signupUser = async (req: Request, res: Response) => {
 
         // Check if user creation was successful
         if (!createdUser) {
-            throw new ApiError(404, "Failed to register the user");
+            return res.json(new ApiError(404, "Failed to register the user")).status(404);
         }
 
         return res.status(201).json({ message: "User created Successfully", data: createdUser });
 
     } catch (error) {
         console.error("The error is : ", error);
-        throw new ApiError(500, "Internal Server Error");
+        return res.json(new ApiError(500, "Internal Server Error")).status(500);
     }
 }
 
@@ -112,6 +112,15 @@ const loginUser = async (req: Request, res: Response) => {
     } catch (error) {
         console.error("The error is : ", error);
         throw new ApiError(500, "Internal Server Error");
+    }
+}
+
+const forgotPassword = async (req: Request, res: Response) => {
+    try {
+
+    } catch (error) {
+        console.error("Error Resetting password : ", error);
+        return res.json(new ApiError(500, "Internal Server Error")).status(500)
     }
 }
 

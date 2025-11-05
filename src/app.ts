@@ -16,7 +16,3 @@ import userRouter from './routes/user.route'
 // Routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter)
-
-
-
-
