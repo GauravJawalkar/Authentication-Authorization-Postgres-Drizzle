@@ -1,10 +1,10 @@
+import { db } from '../db';
+import bcrypt from 'bcrypt';
+import { eq } from 'drizzle-orm';
 import nodemailer from 'nodemailer'
+import type { Response } from 'express';
 import { ApiError } from '../utils/Api.Error';
 import { resetPasswordTable, usersTable } from '../models';
-import { db } from '../db';
-import { eq } from 'drizzle-orm';
-import bcrypt from 'bcrypt'
-import type { Response } from 'express';
 
 export const sendEmail = async (email: string, emailType: string, res: Response) => {
     try {
@@ -19,14 +19,6 @@ export const sendEmail = async (email: string, emailType: string, res: Response)
         }
 
         const encryptedOtp = bcrypt.hashSync(otp, 10).toString();
-
-        if (emailType === "forgotPassword") {
-            await db.insert(resetPasswordTable).values({
-                userId: user?.id,
-                otp: encryptedOtp,
-                expiresAt: new Date(Date.now() + 5 * 60 * 1000)
-            })
-        }
 
         const transporter = nodemailer.createTransport({
             host: process.env.MAIL_HOST!,
@@ -46,6 +38,19 @@ export const sendEmail = async (email: string, emailType: string, res: Response)
 
         try {
             const mailResponse = await transporter.sendMail(mailOptions);
+
+            if (!mailResponse) {
+                return res.status(500).json(new ApiError(500, "Failed to send email"));
+            }
+
+            if (emailType === "forgotPassword") {
+                await db.insert(resetPasswordTable).values({
+                    userId: user?.id,
+                    otp: encryptedOtp,
+                    expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+                })
+            }
+
             return mailResponse;
 
         } catch (error) {
