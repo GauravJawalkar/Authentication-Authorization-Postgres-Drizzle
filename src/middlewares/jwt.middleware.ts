@@ -55,6 +55,7 @@ export const verifyUserJwt = async (req: Request, res: Response, next: NextFunct
                         id: user?.id,
                         name: user.name,
                         email: user.email,
+                        role: user?.role
                     }
 
                     const newAccessToken = generateAccessToken(payload);

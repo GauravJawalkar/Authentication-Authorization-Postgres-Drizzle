@@ -3,5 +3,6 @@ export interface TokenUser {
     name: string,
     lastName?: string,
     email: string,
-    gender?: "male" | "female"
+    gender?: "male" | "female",
+    role: "user" | "admin"
 }
