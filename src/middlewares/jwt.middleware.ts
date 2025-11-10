@@ -16,6 +16,10 @@ export const verifyUserJwt = async (req: Request, res: Response, next: NextFunct
     try {
         const tokenHeader = req.headers.authorization;
 
+        if (!req.user) {
+            return res.status(401).json(new ApiError(401, "You must be authenticated"));
+        }
+
         // Check if authorization header exists
         if (!tokenHeader) {
             return res.status(401).json(new ApiError(401, "Authentication token is required"));
