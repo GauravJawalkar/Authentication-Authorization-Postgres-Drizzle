@@ -92,7 +92,8 @@ const loginUser = async (req: Request, res: Response) => {
             id: loggedUser?.id,
             name: loggedUser?.firstName,
             email: loggedUser?.email,
-            gender: loggedUser?.gender
+            gender: loggedUser?.gender,
+            role: loggedUser?.role
         }
 
         const accessToken = generateAccessToken(payload);

@@ -1,5 +1,7 @@
 import { pgTable, uuid, varchar, pgEnum, timestamp } from "drizzle-orm/pg-core";
+
 export const genderEnum = pgEnum('Gender', ['male', 'female'])
+export const userRoleEnum = pgEnum('User_Role', ['user', 'admin'])
 
 const usersTable = pgTable("users", {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -8,6 +10,7 @@ const usersTable = pgTable("users", {
     email: varchar('Email', { length: 255 }).notNull(),
     gender: genderEnum('Gender').notNull(),
     password: varchar('Password').notNull(),
+    role: userRoleEnum('Role').notNull().default('user'),
     profileImage: varchar('ProfileImage')
 })
 
